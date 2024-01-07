@@ -1,0 +1,12 @@
+.navbar {
+    color: #011524;
+    background-color: #ebe67b;
+    width: 100%;    
+    padding: 1rem;          
+    margin-bottom: 1rem;
+}
+
+.navbar Link {
+    margin-left: 1rem;
+    background-color: black;
+}
