@@ -118,7 +118,7 @@ const DataPage: React.FC = () => {
   const turbidityProgress = ( turbidity / 40);  
   const degrees = Math.floor(temperature);
   return (
-    <div>        
+    <div className="mt-20">        
 
       <div className='flex flex-row justify-center gap-20'>
         {/* <LineChart width={400} height={400} data={sensorData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>

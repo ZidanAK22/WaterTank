@@ -1,9 +1,9 @@
 .navbar {
     color: #ffffff;
-    background-color: #000010;
-    width: 100%;    
-    padding: 1rem;          
-    margin-bottom: 1rem;
+    background-color: gray;
+    width: 100%;        
+    padding: 1rem;                  
+    align-items: center;
 }
 
 .navbar Link {
