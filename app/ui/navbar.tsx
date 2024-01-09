@@ -9,9 +9,9 @@ const MyNavbar = () => {
                 <Link href="/">
                     Home
                 </Link>        
-                <Image src="/bogdanoff.jpg" alt="Brand" height={64} width={64} className="rounded-full"/>
-                <Link href="/about">
-                    About
+                <Image src="/water-tank.svg" alt="Brand" height={64} width={64} className="rounded-full"/>
+                <Link href="/mqtt">
+                    MQTT
                 </Link>                
             </div>        
         </nav>
