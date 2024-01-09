@@ -116,7 +116,7 @@ const DataPage: React.FC = () => {
   const colors: Map<number, string> = new Map([[0, "#00e1ff"], [25, "#00d3ab"], [32, "#bd8a00"], [50, "#b10000"], [75, "#ff0000"]]);
   const turbidColors: Map<number, string> = new Map([[0, "#00e1ff"], [2.5, "#14c8f9"], [6.25, "#2cbbf4"], [12.5, "#756dad"], [25, "#7a477b"], [50, "#6c2747"] ,[100, "#440808"]]);  
   const turbidityProgress = ( turbidity / 40);  
-  const degrees = Math.floor(temperature);
+  const disPercnt = (distance/6)
   return (
     <div className="mt-20">        
 
@@ -136,7 +136,7 @@ const DataPage: React.FC = () => {
         
         <div className='text-center'>
           <h1 className='mb-3'> Ketinggian Air </h1>  
-          <ProgressRing percentage={distance} />
+          <ProgressRing percentage={disPercnt} />
           <br />
           <p>{distance} cm</p>
         </div>
