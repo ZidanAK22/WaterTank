@@ -1,11 +1,14 @@
-// ./app/mqtt/page.tsx
-'use client'
+'use client' // Gunakan client karena mqtt
 
-import { useEffect, useState } from 'react';
+// import dependencies
+import { useEffect, useState } from 'react'; 
 import mqtt from 'mqtt';
+
+// import komponen ui
 import { ProgressRing } from 'progress-ring-component-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
+// deklarasi type
 interface DataPoints {
   timestamp: Date;
   chartTemp: number;
@@ -13,17 +16,17 @@ interface DataPoints {
   chartTurbd: number;
 }
 
-const DataPage: React.FC = () => {    
-  const [selectedDataKey, setSelectedDataKey] = useState<'chartTemp' | 'chartDis' | 'chartTurbd'>('chartTemp');
+// page
+const DataPage: React.FC = () => {      
+
+  // inisialisasi variable state 
   const [chartData, setChartData] = useState<DataPoints[]>([]);
   const [temperature, setTemperature] = useState<any>(0);
   const [distance, setDistance] = useState(0);
-  const [turbidity, setTurbidity] = useState(0);
-  const [date, setDate] = useState<String | null>(null);
+  const [turbidity, setTurbidity] = useState(0);  
   const [currentTimestamp, setCurrentTimestamp] = useState<String | number | null>(null);
     
-  
-
+  // config MQTT client
   const brokerURI = "wss://broker.hivemq.com:8884/mqtt";
   const username = "leledumbo";
   const password = "";
@@ -33,33 +36,14 @@ const DataPage: React.FC = () => {
     clientID: `mqttjs_${Math.random().toString(16).substr(2, 8)}`,
   };
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     const currentDate = new Date();
-  //     const formattedDate = currentDate.toLocaleString("en-US", {
-  //       weekday: "long",
-  //       year: "numeric",
-  //       month: "long",
-  //       day: "numeric",
-  //       hour: "2-digit",
-  //       minute: "2-digit",
-  //       second: "2-digit",
-  //       timeZoneName: "short",
-  //     });
-  
-  //     setDate(formattedDate);
-  //   }, 1000);
-  
-  //   return () => {
-  //     clearInterval(interval);
-  //   };
-  // }, [date]);
-  
+  // jalankan setiap state berubah  
   useEffect(() => {
-      
+    
     const mqttClient = mqtt.connect(brokerURI, clientOptions);  
 
-        mqttClient.on("connect", () => {
+    // saat connect, sub
+    // log dapat diakses pada console browser
+    mqttClient.on("connect", () => {
       console.log("Connected to MQTT broker");
       mqttClient.subscribe("lele-dumbo-temp")            
       mqttClient.subscribe("lele-dumbo-dis")            
@@ -70,12 +54,14 @@ const DataPage: React.FC = () => {
       console.log("reconnecting...")
     });
 
+    // saat menerima pesan, lakukan logic berikut
     mqttClient.on("message", (topic, message) => {
       console.log(message);
       const logDate = new Date(Date.now()).toLocaleString();
       console.log(logDate);
-      setCurrentTimestamp(logDate);
-
+      setCurrentTimestamp(logDate); //dapatkan timestamp saat msg diterima
+  
+      // update state sesuai topic
       if (topic === "lele-dumbo-temp") {      
         setTemperature(parseFloat(message.toString()));  
       };
@@ -84,50 +70,48 @@ const DataPage: React.FC = () => {
         setDistance(parseFloat(message.toString()));
       };
       
-      if (topic === "lele-dumbo-turbd") {
-        // const turbd = JSON.parse(message.toString());
+      if (topic === "lele-dumbo-turbd") {        
         setTurbidity(parseFloat(message.toString()));
-      };
-      
+      };                        
+
+      // update chart data
+      // karena behavior state dari react
+      // perlu message dua kali, agar chart terupdate
       setChartData((previousData) => [
         ...previousData,
-        { timestamp: new Date(), chartTemp: temperature, chartDis: distance, chartTurbd: turbidity },
-      ]);
-
-      console.log(chartData);
+        { timestamp: new Date(Date.now()), chartTemp: temperature, chartDis: distance, chartTurbd: turbidity },
+      ]);      
       
-
-    });
-
+    });    
+    
     mqttClient.on('error', (err) => {
       console.error('MQTT connection error:', err);
-    });  
+    });      
 
+    // cleanup
     return () => {
       mqttClient.end()
     }
 
     
-  }, []);
+  }, [chartData, temperature, distance, turbidity]); // dependency array
 
+  // cek chartdata
+  // useEffect(() => {
+  //   console.log("Updated chartData:", chartData);
+  // }, [chartData]);  
   
-
-  
+  // map warna progress ring
   const colors: Map<number, string> = new Map([[0, "#00e1ff"], [25, "#00d3ab"], [32, "#bd8a00"], [50, "#b10000"], [75, "#ff0000"]]);
   const turbidColors: Map<number, string> = new Map([[0, "#00e1ff"], [2.5, "#14c8f9"], [6.25, "#2cbbf4"], [12.5, "#756dad"], [25, "#7a477b"], [50, "#6c2747"] ,[100, "#440808"]]);  
+
+  // value percentage progress ring
   const turbidityProgress = ( turbidity / 40);  
   const disPercnt = (distance/6)
-  return (
-    <div className="mt-20">        
 
-      <div className='flex flex-row justify-center gap-20'>
-        {/* <LineChart width={400} height={400} data={sensorData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-        <XAxis dataKey="name" />
-        <Tooltip />
-        <CartesianGrid stroke="#f5f5f5" />
-        <Line type="monotone" dataKey="uv" stroke="#ff7300" yAxisId={0} />
-        <Line type="monotone" dataKey="pv" stroke="#387908" yAxisId={1} />
-        </LineChart> */}                                
+  return (
+    <div className="mt-10">        
+      <div className='flex flex-row justify-center gap-20'>                                    
         <div className='text-center'>
           <h1 className='mb-3'> Temperatur Air </h1>  
           <ProgressRing percentage={temperature} colors={colors}/>          
@@ -149,37 +133,39 @@ const DataPage: React.FC = () => {
         </div>    
         
       </div>            
-      
-      <br></br>
-      <br></br>
-      <br></br>
-      <p className='text-center'>Last Update : {currentTimestamp}</p>
-      {/* <p>{date}</p>                               */}
-      
-      {/* <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-        <CartesianGrid stroke="#ccc" />     
-        <XAxis dataKey="timestamp"/>   
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="chartTemp" stroke="#8884d8" />
-      </LineChart> */}
+            
+      <p className='text-center mt-10'>Last Update : {currentTimestamp}</p>      
 
-      {/* <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-        <CartesianGrid stroke="#ccc" />        
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="chartDis" stroke="#8884d8" />
-      </LineChart>
+      <div className='flex flex-row justify-center gap-20'>    
+        <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+          <CartesianGrid stroke="#ccc" />     
+          <XAxis dataKey="timestamp"/>   
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="chartTemp" stroke="#8884d8" />
+        </LineChart>
 
-      <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-        <CartesianGrid stroke="#ccc" />        
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="chartTurbd" stroke="#8884d8" />
-      </LineChart> */}
+        <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+          <CartesianGrid stroke="#ccc" />        
+          <XAxis dataKey="timestamp"/>  
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="chartDis" stroke="#8fdca9" />
+        </LineChart>        
+      </div>
+
+      <div className='flex flex-row justify-center gap-20'>   
+        <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+          <CartesianGrid stroke="#ccc" />        
+          <XAxis dataKey="timestamp"/>  
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="chartTurbd" stroke="#e39588" />
+        </LineChart>
+      </div>
 
     </div>
   );
