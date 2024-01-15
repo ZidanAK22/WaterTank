@@ -102,8 +102,14 @@ const DataPage: React.FC = () => {
   // }, [chartData]);  
   
   // map warna progress ring
-  const colors: Map<number, string> = new Map([[0, "#00e1ff"], [25, "#00d3ab"], [32, "#bd8a00"], [50, "#b10000"], [75, "#ff0000"]]);
-  const turbidColors: Map<number, string> = new Map([[0, "#00e1ff"], [2.5, "#14c8f9"], [6.25, "#2cbbf4"], [12.5, "#756dad"], [25, "#7a477b"], [50, "#6c2747"] ,[100, "#440808"]]);  
+  const colors: Map<number, string> = 
+    new Map([
+      [0, "#00e1ff"], [25, "#00d3ab"], [32, "#bd8a00"], [50, "#b10000"], [75, "#ff0000"]
+    ]);
+  const turbidColors: Map<number, string> = 
+    new Map([
+      [0, "#00e1ff"], [2.5, "#14c8f9"], [6.25, "#2cbbf4"], [12.5, "#756dad"], [25, "#7a477b"], [50, "#6c2747"] ,[100, "#440808"]
+    ]);  
 
   // value percentage progress ring
   const turbidityProgress = ( turbidity / 40);  
@@ -135,7 +141,7 @@ const DataPage: React.FC = () => {
       </div>            
             
       <p className='text-center mt-10'>Last Update : {currentTimestamp}</p>      
-
+      
       <div className='flex flex-row justify-center gap-20'>    
         <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
           <CartesianGrid stroke="#ccc" />     
