@@ -3,10 +3,14 @@
 // import dependencies
 import { useEffect, useState } from 'react'; 
 import mqtt from 'mqtt';
+import { postSensorData } from '../lib/data';
 
 // import komponen ui
 import { ProgressRing } from 'progress-ring-component-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Pi } from 'lucide-react';
+import { sensorData } from '../lib/definition';
+
 
 // deklarasi type
 interface DataPoints {
@@ -14,6 +18,7 @@ interface DataPoints {
   chartTemp: number;
   chartDis: number;
   chartTurbd: number;
+  chartVol: number;
 }
 
 // page
@@ -24,6 +29,7 @@ const DataPage: React.FC = () => {
   const [temperature, setTemperature] = useState<any>(0);
   const [distance, setDistance] = useState(0);
   const [turbidity, setTurbidity] = useState(0);  
+  const [volume, setVolume] = useState(0);
   const [currentTimestamp, setCurrentTimestamp] = useState<String | number | null>(null);
     
   // config MQTT client
@@ -39,19 +45,21 @@ const DataPage: React.FC = () => {
   // jalankan setiap state berubah  
   useEffect(() => {
     
+    let interval: NodeJS.Timeout | undefined ; 
+
     const mqttClient = mqtt.connect(brokerURI, clientOptions);  
 
     // saat connect, sub
     // log dapat diakses pada console browser
     mqttClient.on("connect", () => {
       console.log("Connected to MQTT broker");
-      mqttClient.subscribe("lele-dumbo-temp")            
-      mqttClient.subscribe("lele-dumbo-dis")            
-      mqttClient.subscribe("lele-dumbo-turbd")            
+      mqttClient.subscribe("lele-dumbo-temp");            
+      mqttClient.subscribe("lele-dumbo-dis");            
+      mqttClient.subscribe("lele-dumbo-turbd");            
     });
     
     mqttClient.on("reconnect", () => {
-      console.log("reconnecting...")
+      console.log("reconnecting...");
     });
 
     // saat menerima pesan, lakukan logic berikut
@@ -66,8 +74,10 @@ const DataPage: React.FC = () => {
         setTemperature(parseFloat(message.toString()));  
       };
 
-      if (topic === "lele-dumbo-dis") {        
+      if (topic === "lele-dumbo-dis") {            
         setDistance(parseFloat(message.toString()));
+        const calcVolume = 100 - distance * 3.14;
+        setVolume(calcVolume);
       };
       
       if (topic === "lele-dumbo-turbd") {        
@@ -79,9 +89,30 @@ const DataPage: React.FC = () => {
       // perlu message dua kali, agar chart terupdate
       setChartData((previousData) => [
         ...previousData,
-        { timestamp: new Date(Date.now()), chartTemp: temperature, chartDis: distance, chartTurbd: turbidity },
+        { timestamp: new Date(Date.now()), chartTemp: temperature, chartDis: distance, chartTurbd: turbidity, chartVol: volume, },
       ]);      
-      
+
+      if (!interval) {
+        interval = setInterval(async () => {
+          try {
+            const dataToSave: sensorData = {
+              id: 0,
+              temperature,
+              distance,
+              turbidity,
+              volume,
+              timestamp: new Date(Date.now()),
+            };
+
+            await postSensorData(dataToSave);
+          } catch (err) {
+            console.error('Failed to Save Data to Database: ', err);
+          } finally {
+            console.log('Data posted');
+          }
+
+        }, 30000);
+      }      
     });    
     
     mqttClient.on('error', (err) => {
@@ -90,6 +121,9 @@ const DataPage: React.FC = () => {
 
     // cleanup
     return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
       mqttClient.end()
     }
 
@@ -170,6 +204,15 @@ const DataPage: React.FC = () => {
           <Tooltip />
           <Legend />
           <Line type="monotone" dataKey="chartTurbd" stroke="#e39588" />
+        </LineChart>
+
+        <LineChart width={600} height={300} data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+          <CartesianGrid stroke="#ccc" />        
+          <XAxis dataKey="timestamp"/>  
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="chartVol" stroke="#fff000" />
         </LineChart>
       </div>
 
