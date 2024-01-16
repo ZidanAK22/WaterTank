@@ -3,7 +3,7 @@ import { sensorData } from "./definition";
 
 export async function fetchSensorData() {
     try {
-        const data = await sql<sensorData>`SELECT * FROM data_sensor LIMIT 1`;
+        const data = await sql<sensorData>`SELECT * FROM data_sensor LIMIT 5`;
 
         return data.rows;
 
