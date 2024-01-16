@@ -43,9 +43,7 @@ const DataPage: React.FC = () => {
   };
 
   // jalankan setiap state berubah  
-  useEffect(() => {
-    
-    let interval: NodeJS.Timeout | undefined ; 
+  useEffect(() => {        
 
     const mqttClient = mqtt.connect(brokerURI, clientOptions);  
 
@@ -90,40 +88,28 @@ const DataPage: React.FC = () => {
       setChartData((previousData) => [
         ...previousData,
         { timestamp: new Date(Date.now()), chartTemp: temperature, chartDis: distance, chartTurbd: turbidity, chartVol: volume, },
-      ]);      
-
-      if (!interval) {
-        interval = setInterval(async () => {
-          try {
-            const dataToSave: sensorData = {
-              id: 0,
-              temperature,
-              distance,
-              turbidity,
-              volume,
-              timestamp: new Date(Date.now()),
-            };
-
-            await postSensorData(dataToSave);
-          } catch (err) {
-            console.error('Failed to Save Data to Database: ', err);
-          } finally {
-            console.log('Data posted');
-          }
-
-        }, 30000);
-      }      
+      ]);                                    
+         
+      const dataToSave: sensorData = {              
+        temperature,
+        distance,
+        turbidity,
+        volume,
+        timestamp: new Date(Date.now()),
+      };
+  
+      postSensorData(dataToSave);
+      
     });    
     
     mqttClient.on('error', (err) => {
       console.error('MQTT connection error:', err);
     });      
 
+    
+
     // cleanup
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
+    return () => {      
       mqttClient.end()
     }
 

@@ -13,13 +13,49 @@ export async function fetchSensorData() {
     }    
 };
 
+export async function fetchTemperatureData() {
+    try {
+        const data = await sql`SELECT temperature FROM data_sensor LIMIT 1`;
+
+        return data.rows;
+
+    } catch (error) {
+        console.log('Database error :', error);        
+        throw new Error('Failed to fetch temperature data.');
+    }    
+};
+
+export async function fetchDistanceData() {
+    try {
+        const data = await sql`SELECT distance FROM data_sensor LIMIT 1`;
+
+        return data.rows;
+
+    } catch (error) {
+        console.log('Database error :', error);        
+        throw new Error('Failed to fetch distance data.');
+    }    
+};
+
+export async function fetchTurbidityData() {
+    try {
+        const data = await sql`SELECT turbidity FROM data_sensor LIMIT 1`;
+
+        return data.rows;
+
+    } catch (error) {
+        console.log('Database error :', error);        
+        throw new Error('Failed to fetch turbidity data.');
+    }    
+};
+
 export async function postSensorData(data: sensorData) {
     try {
         const result = await sql`
-            INSERT INTO data_sensor
+            INSERT INTO sensor_data
             (id, temperature, distance, turbidity, volume, timestamp)
             VALUES
-            (${data.id}, ${data.temperature}, ${data.distance}, ${data.turbidity}, ${data.volume}, ${data.timestamp.toUTCString()})
+            (${data.temperature}, ${data.distance}, ${data.turbidity}, ${data.volume}, ${data.timestamp.toUTCString()})
             RETURNING *;`;
 
         return result.rows[0];

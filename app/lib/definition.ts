@@ -1,5 +1,4 @@
-export type sensorData = {
-    id: number,
+export type sensorData = {    
     temperature: number,
     distance: number,
     turbidity: number,
