@@ -49,6 +49,30 @@ export async function fetchTurbidityData() {
     }    
 };
 
+export async function fetchLastWeekAvg() {
+    try{
+        const data = await sql`
+            SELECT
+            DATE_TRUNC('day', timestamp) AS day,
+            AVG(temperature) AS avg_temperature,
+            AVG(distance) AS avg_distance,
+            AVG(turbidity) AS avg_turbidity,
+            AVG(volume) AS avg_volume
+            FROM
+            data_sensor
+            GROUP BY
+            day
+            ORDER BY
+            day;
+        `;
+        return data.rows;    
+    } catch (error) {
+        console.log('Database error :', error);        
+        throw new Error('Failed to fetch data.');
+    }
+    
+}
+
 export async function postSensorData(data: sensorData) {
     try {
         const result = await sql`
