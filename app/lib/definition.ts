@@ -3,5 +3,5 @@ export type sensorData = {
     distance: number,
     turbidity: number,
     volume: number,
-    timestamp: Date,
+    timestamp: any,
 };

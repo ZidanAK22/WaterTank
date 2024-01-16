@@ -10,6 +10,7 @@ import { ProgressRing } from 'progress-ring-component-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Pi } from 'lucide-react';
 import { sensorData } from '../lib/definition';
+import { timeStamp } from 'console';
 
 
 // deklarasi type
@@ -63,7 +64,7 @@ const DataPage: React.FC = () => {
     // saat menerima pesan, lakukan logic berikut
     mqttClient.on("message", (topic, message) => {
       console.log(message);
-      const logDate = new Date(Date.now()).toLocaleString();
+      const logDate = new Date(Date.now()).toISOString();
       console.log(logDate);
       setCurrentTimestamp(logDate); //dapatkan timestamp saat msg diterima
   
@@ -95,11 +96,12 @@ const DataPage: React.FC = () => {
         distance,
         turbidity,
         volume,
-        timestamp: new Date(Date.now()),
-      };
-  
+        timestamp: currentTimestamp,      
+      };        
+
+      console.log(currentTimestamp);
+
       postSensorData(dataToSave);
-      
     });    
     
     mqttClient.on('error', (err) => {
@@ -201,6 +203,8 @@ const DataPage: React.FC = () => {
           <Line type="monotone" dataKey="chartVol" stroke="#fff000" />
         </LineChart>
       </div>
+
+    
 
     </div>
   );

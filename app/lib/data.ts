@@ -52,10 +52,10 @@ export async function fetchTurbidityData() {
 export async function postSensorData(data: sensorData) {
     try {
         const result = await sql`
-            INSERT INTO sensor_data
+            INSERT INTO data_sensor
             (id, temperature, distance, turbidity, volume, timestamp)
             VALUES
-            (${data.temperature}, ${data.distance}, ${data.turbidity}, ${data.volume}, ${data.timestamp.toUTCString()})
+            (DEFAULT, ${data.temperature}, ${data.distance}, ${data.turbidity}, ${data.volume}, ${data.timestamp})
             RETURNING *;`;
 
         return result.rows[0];
